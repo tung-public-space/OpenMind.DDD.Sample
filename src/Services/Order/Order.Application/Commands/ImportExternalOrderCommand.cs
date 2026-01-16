@@ -1,5 +1,7 @@
+using BuildingBlocks.Domain.BusinessRules;
 using MediatR;
 using Order.Application.AntiCorruption;
+using Order.Application.BusinessRules;
 using Order.Domain.Factories;
 using Order.Domain.Repositories;
 
@@ -30,11 +32,12 @@ public record ImportExternalOrderItemCommand
 
 /// <summary>
 /// Application Service - orchestrates the import flow:
-/// 1. Translate external data (ACL)
-/// 2. Create order via domain factory (invariants)
-/// 3. Persist aggregate
+/// 1. Validate input using BusinessRuleChecker (application-level validation)
+/// 2. Translate external data (ACL)
+/// 3. Create order via domain factory (domain invariants)
+/// 4. Persist aggregate
 /// 
-/// NO business logic here - only orchestration.
+/// NO business logic here - only orchestration and input validation.
 /// </summary>
 public class ImportExternalOrderCommandHandler(
     IOrderRepository orderRepository,
@@ -43,6 +46,18 @@ public class ImportExternalOrderCommandHandler(
 {
     public async Task<Guid> Handle(ImportExternalOrderCommand request, CancellationToken cancellationToken)
     {
+        BusinessRuleChecker.ValidateAll(
+            new CustomerIdMustBeProvidedRule(request.CustomerId),
+            new ShippingAddressMustBeCompleteRule(
+                request.ShippingStreet,
+                request.ShippingCity,
+                request.ShippingCountry,
+                request.ShippingZipCode),
+            new ImportedOrderMustHaveItemsRule(request.Items.Count),
+            new ImportedItemsMustHaveValidPricesRule(request.Items.Select(i => i.UnitPrice)),
+            new ImportedItemsMustHaveValidQuantitiesRule(request.Items.Select(i => i.Quantity))
+        );
+
         var externalDto = new ExternalOrderDto(
             ExternalOrderId: request.ExternalOrderId,
             CustomerId: request.CustomerId,
