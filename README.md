@@ -1,6 +1,6 @@
 # Domain-Driven Design Microservices Application
 
-A comprehensive implementation of Domain-Driven Design (DDD) patterns from Eric Evans' book "Domain-Driven Design: Tackling Complexity in the Heart of Software" using C# and .NET 8.
+A comprehensive implementation of Domain-Driven Design (DDD) patterns from Eric Evans' book "Domain-Driven Design: Tackling Complexity in the Heart of Software" using C# and .NET 10.
 
 ## 🎯 Key DDD Principles Demonstrated
 
@@ -245,8 +245,9 @@ DDD/
 ## 🚀 Getting Started
 
 ### Prerequisites
-- .NET 8.0 SDK
+- .NET 10.0 SDK
 - Visual Studio 2022 or VS Code
+- Docker & Docker Compose (optional, for containerized deployment)
 
 ### Build
 ```bash
@@ -266,6 +267,41 @@ cd src/Services/Payment/Payment.API
 dotnet run
 ```
 Access Swagger UI at: https://localhost:5002/swagger
+
+### 🐳 Run with Docker
+
+#### Local Development (Infrastructure Only)
+
+Start only infrastructure services (MongoDB) and run APIs from your IDE:
+
+```bash
+docker-compose --profile infra up -d
+```
+
+Then run Order API and Payment API from Visual Studio or VS Code. MongoDB will be available at `localhost:27017`.
+
+#### Full Stack (All Services)
+
+Start all services (MongoDB, Order API, Payment API):
+
+```bash
+docker-compose --profile all up -d
+```
+
+This will:
+- Start MongoDB on port 27017
+- Build and start Order API on http://localhost:5001
+- Build and start Payment API on http://localhost:5002
+
+#### Docker Commands
+
+| Command | Description |
+|---------|-------------|
+| `docker-compose --profile infra up -d` | Start infrastructure only (MongoDB) |
+| `docker-compose --profile all up -d` | Start all services |
+| `docker-compose --profile all up -d --build` | Rebuild and start all services |
+| `docker-compose --profile all down` | Stop all services |
+| `docker-compose down -v` | Stop and remove volumes |
 
 ## 📋 API Examples
 
