@@ -1,28 +1,16 @@
 # Domain-Driven Design
 
-An implementation of Domain-Driven Design (DDD) patterns (tactical design) from Eric Evans' book "Domain-Driven Design: Tackling Complexity in the Heart of Software".
+An implementation of Domain-Driven Design Tactical Patterns.
 
 ## References
 
 - Evans, Eric. "Domain-Driven Design: Tackling Complexity in the Heart of Software"
+- Vernon, Vaughn. "Domain-Driven Design Distilled"
 - Vernon, Vaughn. "Implementing Domain-Driven Design"
 
-## Strategic Patterns
+## Tactical Design Patterns
 
-### 1. Bounded Contexts
-Each service represents a separate bounded context with its own:
-- Domain model
-- Ubiquitous language
-- Persistence mechanism
-- API
-
-### 2. Context Mapping
-- **Integration Events**: Cross-context communication via events
-- **Anti-Corruption Layer**: Integration event handlers translate between contexts
-
-## Tactical Patterns
-
-### 3. Entities
+### Entities
 Objects defined by their identity, not their attributes.
 ```csharp
 public abstract class Entity<TId> : IEquatable<Entity<TId>>
@@ -32,7 +20,7 @@ public abstract class Entity<TId> : IEquatable<Entity<TId>>
 }
 ```
 
-### 4. Value Objects
+### Value Objects
 Immutable objects defined by their attributes.
 ```csharp
 public class Money : ValueObject
@@ -43,7 +31,7 @@ public class Money : ValueObject
 }
 ```
 
-### 5. Aggregates & Aggregate Roots
+### Aggregates
 Consistency boundaries with a single entry point.
 ```csharp
 public class Order : AggregateRoot<OrderId>
@@ -54,7 +42,7 @@ public class Order : AggregateRoot<OrderId>
 }
 ```
 
-### 6. Domain Events
+### Domain Events
 Facts about what happened in the domain.
 ```csharp
 public record OrderSubmittedDomainEvent : DomainEventBase
@@ -64,7 +52,7 @@ public record OrderSubmittedDomainEvent : DomainEventBase
 }
 ```
 
-### 7. Repository Pattern
+### Repository Pattern
 Collection-like interface for aggregates.
 ```csharp
 public interface IOrderRepository : IRepository<Order, OrderId>
@@ -73,7 +61,7 @@ public interface IOrderRepository : IRepository<Order, OrderId>
 }
 ```
 
-### 8. Domain Services
+### Domain Services
 Stateless operations that don't belong to entities.
 ```csharp
 public interface IPaymentProcessingService : IDomainService
@@ -83,7 +71,7 @@ public interface IPaymentProcessingService : IDomainService
 }
 ```
 
-### 9. Specification Pattern
+### Specification Pattern
 Encapsulated business rules for **querying and filtering**.
 ```csharp
 public class OrderReadyForProcessingSpecification : Specification<Order>
@@ -100,7 +88,7 @@ var cancellableOrders = await repository.FindAsync(new CancellableOrderSpecifica
 var spec = new MinimumOrderValueSpecification(100) & new CancellableOrderSpecification();
 ```
 
-### 10. Business Rule Pattern
+### Business Rule Pattern
 Encapsulated business rules for **validation and enforcement** with clear error messages.
 ```csharp
 public interface IBusinessRule
@@ -130,27 +118,7 @@ public void Submit()
 }
 ```
 
-## Specification vs Business Rule Pattern
-
-> 💡 Think of it this way: **Specification** is a *tester* (tells you if something is true), while **Business Rule** is a *guard* (enforces a policy and explains what went wrong).
-
-| Aspect | 🔍 Specification Pattern | 🛡️ Business Rule Pattern |
-|:-------|:-------------------------|:--------------------------|
-| **Primary Goal** | Selection & Filtering | Validation & Enforcement |
-| **Output** | Simple `boolean` | Result with error message + code |
-| **Logic Style** | Declarative | Policy-based |
-| **Example** | *"Is this order cancellable?"* | *"Order must have items to submit"* |
-| **Composition** | Chainable (`And`, `Or`, `Not`) | Flat list of rules |
-| **Use Case** | Repository queries, filtering | Invariant enforcement |
-| **Data Access** | Database queries (LINQ expressions) | In-memory validation |
-| **Reusability** | High (UI, Repository, Services) | Specific to action/command |
-| **Error Handling** | ❌ No error details | ✅ Rich error messages |
-
-**When to use which:**
-- Use **Specification** when you need to **filter** collections or check a **state** used in multiple places
-- Use **Business Rule** when you need to **validate** a specific action and return a clear reason when blocked
-
-### 11. Enumeration Pattern
+### Enumeration Pattern
 Type-safe, behavior-rich enumerations.
 ```csharp
 public class OrderStatus : Enumeration
@@ -162,7 +130,7 @@ public class OrderStatus : Enumeration
 }
 ```
 
-### 12. Factory Pattern
+### Factory Pattern
 Encapsulated object creation.
 ```csharp
 public static Order Create(CustomerId customerId, Address address)
